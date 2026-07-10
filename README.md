@@ -1,2 +1,3 @@
 # botgod-nav
 Live GPS speedometer and speed-limit sign with overspeed alerts, built on free OpenStreetMap data — with destination search and turn-by-turn routing.
+Botgod Nav is a dashboard-style sat nav focused on one thing: keeping the speed limit visible and impossible to miss. A large road-sign-style display shows the current limit pulled from OpenStreetMap, sitting next to a live GPS speedometer — both flash red with an audible alert the moment you go over. Destination search and turn-by-turn directions are included as secondary features, powered by free OSM routing (OSRM) with no API keys required.
