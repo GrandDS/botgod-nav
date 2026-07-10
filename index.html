@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0B0D10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Botgod Nav">
+<title>Botgod Nav</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='white' stroke='%23D0021B' stroke-width='10'/%3E%3Ctext x='50' y='68' font-size='48' font-family='Arial,sans-serif' font-weight='800' text-anchor='middle' fill='black'%3E30%3C/text%3E%3C/svg%3E">
+<link rel="manifest" id="manifest-link">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0C0F;
+    --bg-panel:#15181D;
+    --bg-panel2:#1D2127;
+    --hairline:#262B32;
+    --text:#F2F4F6;
+    --muted:#8A93A0;
+    --muted-dim:#5C6470;
+    --cyan:#3FE0C8;
+    --sign-red:#CE1126;
+    --alert-red:#FF2E4D;
+    --amber:#FFB020;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 120% 60% at 50% -10%, #171B21 0%, var(--bg) 55%);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    overscroll-behavior:none;
+    min-height:100vh;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .num{font-family:'Oswald',sans-serif;}
+
+  /* ---- top bar ---- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px 8px;
+  }
+  .brand{display:flex; align-items:center; gap:8px;}
+  .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan); box-shadow:0 0 8px var(--cyan);}
+  .brand span{font-weight:700; letter-spacing:0.02em; font-size:15px;}
+  .topbtns{display:flex; gap:8px;}
+  .iconbtn{
+    width:38px;height:38px; border-radius:10px; border:1px solid var(--hairline);
+    background:var(--bg-panel); color:var(--muted); display:flex; align-items:center;justify-content:center;
+    font-size:15px; cursor:pointer;
+  }
+  .iconbtn.active{color:var(--cyan); border-color:#22443F;}
+  .iconbtn.muted-on{color:var(--alert-red); border-color:#4A2026;}
+
+  /* ---- gps status panel ---- */
+  .gpspanel{
+    margin:0 16px 12px; padding:12px 14px; border-radius:14px;
+    background:var(--bg-panel); border:1px solid var(--hairline);
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  .gpspanel .status-dot{
+    width:10px;height:10px;border-radius:50%; background:var(--muted-dim); flex:0 0 auto;
+  }
+  .gpspanel.searching .status-dot{ background:var(--amber); box-shadow:0 0 8px var(--amber); animation:pulseDot 1s ease-in-out infinite; }
+  .gpspanel.weak .status-dot{ background:var(--amber); box-shadow:0 0 8px var(--amber); }
+  .gpspanel.locked .status-dot{ background:var(--cyan); box-shadow:0 0 8px var(--cyan); }
+  .gpspanel.error .status-dot{ background:var(--alert-red); box-shadow:0 0 8px var(--alert-red); }
+  @keyframes pulseDot{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+  .gpspanel .status-text{ flex:1; min-width:140px; }
+  .gpspanel .status-main{ font-size:13px; font-weight:600; color:var(--text); }
+  .gpspanel .status-sub{ font-size:11px; color:var(--muted); margin-top:2px; }
+  .gpspanel .retrybtn{
+    background:var(--bg-panel2); border:1px solid var(--hairline); color:var(--cyan);
+    font-size:12px; font-weight:600; padding:8px 12px; border-radius:10px; cursor:pointer; flex:0 0 auto;
+  }
+  .gpspanel .retrybtn:active{ opacity:0.7; }
+
+  /* ---- hero: sign + speedometer ---- */
+  .hero{
+    display:flex; align-items:stretch; gap:12px;
+    padding:6px 16px 14px;
+  }
+  .sign-wrap{
+    flex:0 0 40%;
+    display:flex; align-items:center; justify-content:center;
+    aspect-ratio:1/1;
+    max-height:190px;
+  }
+  .sign{
+    position:relative;
+    width:100%; height:100%;
+    border-radius:50%;
+    background:#F5F5F2;
+    border:14px solid var(--sign-red);
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(0,0,0,0.05);
+    transition: border-color .18s ease, box-shadow .18s ease;
+  }
+  .sign.speeding{
+    border-color: var(--alert-red);
+    animation: signPulse 0.9s ease-in-out infinite;
+  }
+  @keyframes signPulse{
+    0%,100%{ box-shadow:0 8px 24px rgba(255,46,77,0.15), 0 0 0 0 rgba(255,46,77,0.55);}
+    50%{ box-shadow:0 8px 34px rgba(255,46,77,0.35), 0 0 0 14px rgba(255,46,77,0);}
+  }
+  .sign .val{
+    font-size:clamp(38px,11vw,64px); font-weight:700; color:#111; line-height:1; letter-spacing:-1px;
+  }
+  .sign .val.placeholder{ color:#9AA0A6; font-size:clamp(28px,8vw,42px); }
+  .sign .unit{
+    font-family:'Inter'; font-size:10px; font-weight:700; letter-spacing:0.08em; color:#555; margin-top:2px; text-transform:uppercase;
+  }
+
+  .speedo{
+    flex:1;
+    background:var(--bg-panel);
+    border:1px solid var(--hairline);
+    border-radius:20px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+    transition: box-shadow .2s ease, border-color .2s ease;
+  }
+  .speedo.speeding{
+    border-color:#4A2026;
+    box-shadow: inset 0 0 0 2px rgba(255,46,77,0.35), 0 0 26px rgba(255,46,77,0.25);
+    animation: speedoFlash 0.9s ease-in-out infinite;
+  }
+  @keyframes speedoFlash{
+    0%,100%{ background:var(--bg-panel); }
+    50%{ background:#231519; }
+  }
+  .speedo .value{
+    font-size:clamp(46px,15vw,84px); font-weight:600; line-height:1; color:var(--text);
+    text-shadow:0 0 18px rgba(63,224,200,0.25);
+  }
+  .speedo.speeding .value{ color:#FFDCE0; text-shadow:0 0 18px rgba(255,46,77,0.55); }
+  .speedo .unit{ font-size:11px; color:var(--muted); margin-top:6px; letter-spacing:0.08em; text-transform:uppercase; }
+  .speedo .gpsdot{
+    position:absolute; top:10px; right:12px; font-size:9px; color:var(--muted-dim);
+    display:flex; align-items:center; gap:5px;
+  }
+  .speedo .gpsdot .d{width:6px;height:6px;border-radius:50%; background:var(--muted-dim);}
+  .speedo .gpsdot.live .d{ background:var(--cyan); box-shadow:0 0 6px var(--cyan);}
+
+  /* ---- alert banner (screen edge) ---- */
+  .screen-alert{
+    position:fixed; inset:0; pointer-events:none; z-index:5;
+    box-shadow: inset 0 0 0 0 rgba(255,46,77,0);
+    transition: box-shadow .15s ease;
+  }
+  .screen-alert.on{ animation: edgeFlash 0.9s ease-in-out infinite; }
+  @keyframes edgeFlash{
+    0%,100%{ box-shadow: inset 0 0 40px 4px rgba(255,46,77,0.0);}
+    50%{ box-shadow: inset 0 0 46px 10px rgba(255,46,77,0.55);}
+  }
+
+  .overtext{
+    text-align:center; font-size:12px; color:var(--muted); padding:0 16px 10px; min-height:16px;
+  }
+  .overtext.speeding{ color:var(--alert-red); font-weight:600; }
+
+  /* ---- maneuver banner ---- */
+  .maneuver{
+    margin:0 16px 12px; padding:14px 16px; border-radius:16px;
+    background:linear-gradient(135deg,#12312D,#0E2521);
+    border:1px solid #1E4A43;
+    display:none; align-items:center; gap:14px;
+  }
+  .maneuver.show{display:flex;}
+  .maneuver .arrow{ font-size:26px; color:var(--cyan); flex:0 0 auto; }
+  .maneuver .info{ flex:1; min-width:0;}
+  .maneuver .instr{ font-size:15px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .maneuver .dist{ font-size:12px; color:var(--cyan); margin-top:2px; }
+
+  /* ---- search ---- */
+  .searchwrap{ margin:0 16px 10px; position:relative; z-index:2; }
+  .searchbar{
+    display:flex; align-items:center; gap:10px;
+    background:var(--bg-panel); border:1px solid var(--hairline); border-radius:14px;
+    padding:12px 14px;
+  }
+  .searchbar input{
+    flex:1; background:none; border:none; outline:none; color:var(--text); font-size:14px; font-family:'Inter';
+  }
+  .searchbar input::placeholder{ color:var(--muted-dim); }
+  .searchbar .go{ color:var(--muted); font-size:14px; }
+  .searchbar .searchgo{
+    font-size:15px; padding:4px 6px; border-radius:8px; background:var(--bg-panel2);
+  }
+  .searchbar .searchgo:active{ background:var(--hairline); }
+  .searchgobtn{
+    margin-top:8px; width:100%; text-align:center; padding:12px; border-radius:12px;
+    background:linear-gradient(135deg,#1E4A43,#123430); border:1px solid #1E4A43; color:var(--cyan);
+    font-weight:600; font-size:13px; cursor:pointer;
+  }
+  .searchgobtn:active{ opacity:0.75; }
+  .suggestions{
+    position:absolute; left:0; right:0; top:calc(100% + 6px);
+    background:var(--bg-panel2); border:1px solid var(--hairline); border-radius:14px;
+    overflow:hidden; z-index:500; max-height:230px; overflow-y:auto;
+    display:none;
+    box-shadow:0 12px 32px rgba(0,0,0,0.6);
+  }
+  .suggestions.show{display:block;}
+  .sug-item{
+    padding:12px 14px; font-size:13px; color:var(--text); border-bottom:1px solid var(--hairline); cursor:pointer;
+  }
+  .sug-item:last-child{border-bottom:none;}
+  .sug-item:active{ background:var(--bg-panel); }
+  .sug-item .sub{ display:block; font-size:11px; color:var(--muted); margin-top:2px; }
+
+  /* ---- map ---- */
+  .mapwrap{ margin:0 16px 12px; border-radius:18px; overflow:hidden; border:1px solid var(--hairline); position:relative; z-index:1; }
+  .map-rotator{
+    position:absolute; top:50%; left:50%; width:220%; height:220%;
+    transform: translate(-50%,-50%) rotate(0deg);
+    transform-origin:center center;
+    transition: transform 0.35s ease-out;
+  }
+  #map{ height:100%; width:100%; background:#11151A; }
+  .mapwrap{ height:320px; }
+  .compassbtn{
+    position:absolute; left:10px; bottom:10px; z-index:400;
+    background:var(--bg-panel); border:1px solid var(--hairline); color:var(--muted);
+    width:36px;height:36px;border-radius:10px; display:flex;align-items:center;justify-content:center;
+    font-size:16px; cursor:pointer;
+  }
+  .compassbtn.active{ color:var(--cyan); border-color:#22443F; background:#12312D; }
+  .recenter{
+    position:absolute; right:10px; bottom:10px; z-index:400;
+    background:var(--bg-panel); border:1px solid var(--hairline); color:var(--cyan);
+    width:36px;height:36px;border-radius:10px; display:flex;align-items:center;justify-content:center;
+    font-size:14px; cursor:pointer;
+  }
+
+  /* ---- controls ---- */
+  .controls{ display:flex; gap:10px; margin:0 16px 14px; }
+  .btn{
+    flex:1; text-align:center; padding:13px; border-radius:14px; font-weight:600; font-size:14px;
+    border:1px solid var(--hairline); background:var(--bg-panel); color:var(--text); cursor:pointer;
+  }
+  .btn.primary{ background:linear-gradient(135deg,#1E4A43,#123430); border-color:#1E4A43; color:var(--cyan); }
+  .btn.stop{ background:linear-gradient(135deg,#4A1E24,#301215); border-color:#4A1E24; color:#FF8A97; }
+  .btn:disabled{ opacity:0.4; }
+
+  /* ---- steps ---- */
+  .stepstitle{ padding:0 16px 8px; font-size:12px; color:var(--muted); font-weight:600; letter-spacing:0.04em; text-transform:uppercase; display:none;}
+  .stepstitle.show{display:block;}
+  .steps{ margin:0 16px 24px; display:none; flex-direction:column; gap:1px; border-radius:16px; overflow:hidden; border:1px solid var(--hairline);}
+  .steps.show{display:flex;}
+  .step{
+    background:var(--bg-panel); padding:12px 14px; display:flex; align-items:center; gap:12px;
+  }
+  .step.current{ background:var(--bg-panel2); }
+  .step .n{
+    width:22px;height:22px; border-radius:50%; background:var(--bg-panel2); color:var(--muted);
+    font-size:11px; display:flex; align-items:center;justify-content:center; flex:0 0 auto; font-weight:700;
+  }
+  .step.current .n{ background:var(--cyan); color:#082A25; }
+  .step .txt{ flex:1; font-size:13px; color:var(--text); }
+  .step .d{ font-size:11px; color:var(--muted); flex:0 0 auto; }
+
+  .footer-note{ text-align:center; font-size:11px; color:var(--muted-dim); padding:0 24px 26px; line-height:1.5; }
+  .footer-note a{ color:var(--muted); }
+
+  .leaflet-container{ background:#11151A; }
+  .leaflet-control-zoom{ border:1px solid var(--hairline) !important; border-radius:10px !important; overflow:hidden; }
+  .leaflet-control-zoom a{
+    background:var(--bg-panel) !important; color:var(--cyan) !important; border-color:var(--hairline) !important;
+    width:34px !important; height:34px !important; line-height:34px !important; font-size:18px !important;
+  }
+  .leaflet-control-zoom a:hover{ background:var(--bg-panel2) !important; }
+</style>
+</head>
+<body>
+
+<div class="screen-alert" id="screenAlert"></div>
+
+<div id="errorBanner" style="display:none; margin:10px 16px; padding:12px 14px; border-radius:12px; background:#3A1216; border:1px solid #6B1F27; color:#FFB3BC; font-size:12px; line-height:1.5; white-space:pre-wrap; word-break:break-word;"></div>
+
+<div class="topbar">
+  <div class="brand"><div class="dot"></div><span>Botgod Nav</span></div>
+  <div class="topbtns">
+    <div class="iconbtn" id="unitBtn" title="Toggle units">km/h</div>
+    <div class="iconbtn" id="muteBtn" title="Toggle sound">🔊</div>
+  </div>
+</div>
+
+<div class="gpspanel searching" id="gpsPanel">
+  <div class="status-dot" id="gpsStatusDot"></div>
+  <div class="status-text">
+    <div class="status-main" id="gpsStatusMain">Searching for GPS…</div>
+    <div class="status-sub" id="gpsStatusSub">Permission: checking…</div>
+  </div>
+  <div class="retrybtn" id="getLocationBtn">Get location</div>
+</div>
+
+<div class="hero">
+  <div class="sign-wrap">
+    <div class="sign" id="sign">
+      <div class="val placeholder" id="limitVal">---</div>
+      <div class="unit" id="limitUnit">limit</div>
+    </div>
+  </div>
+  <div class="speedo" id="speedo">
+    <div class="gpsdot" id="gpsDot"><div class="d"></div><span>GPS</span></div>
+    <div class="value num" id="speedVal">0</div>
+    <div class="unit" id="speedUnit">km/h</div>
+  </div>
+</div>
+
+<div class="overtext" id="overText">Waiting for GPS…</div>
+
+<div class="maneuver" id="maneuver">
+  <div class="arrow" id="maneuverArrow">↑</div>
+  <div class="info">
+    <div class="instr" id="maneuverInstr">—</div>
+    <div class="dist" id="maneuverDist">—</div>
+  </div>
+</div>
+
+<div class="searchwrap">
+  <div class="searchbar">
+    <span>📍</span>
+    <input id="destInput" type="search" placeholder="Search destination…" autocomplete="off" enterkeyhint="search" inputmode="search">
+    <span class="go" id="clearBtn" style="display:none; cursor:pointer;">✕</span>
+  </div>
+  <div class="searchgobtn" id="searchGoBtn">Search</div>
+  <div id="searchDebug" style="margin-top:6px; font-size:10.5px; color:#5C6470; padding:0 2px; min-height:14px;">Debug: idle — tap Search to test</div>
+  <div class="suggestions" id="suggestions"></div>
+</div>
+
+<div class="mapwrap">
+  <div class="map-rotator" id="mapRotator"><div id="map"></div></div>
+  <div class="recenter" id="recenterBtn">⦿</div>
+  <div class="compassbtn" id="compassBtn" title="Toggle course-up mode">🧭</div>
+</div>
+
+<div class="controls">
+  <div class="btn primary" id="startBtn">Start navigation</div>
+  <div class="btn stop" id="stopBtn" style="display:none;">Stop</div>
+</div>
+
+<div class="stepstitle" id="stepsTitle">Turn-by-turn</div>
+<div class="steps" id="steps"></div>
+
+<div class="footer-note">
+  Speed limits from OpenStreetMap (maxspeed tags) — coverage varies by region. Routing via OSRM · Map data © OpenStreetMap contributors. For reference only; always follow posted signage.
+</div>
+
+<script>
+  // Global error reporter — surfaces any JS crash on-screen instead of failing silently.
+  (function(){
+    const seen = new Set();
+    function show(msg){
+      if(seen.has(msg)) return;
+      seen.add(msg);
+      const el = document.getElementById('errorBanner');
+      if(!el) return;
+      el.style.display = 'block';
+      el.textContent = (el.textContent ? el.textContent + '\n\n' : '') + msg;
+    }
+    window.addEventListener('error', function(e){
+      show('Script error: ' + (e.message || 'unknown') + (e.filename ? (' @ ' + e.filename.split('/').pop() + ':' + e.lineno) : ''));
+    });
+    window.addEventListener('unhandledrejection', function(e){
+      show('Unhandled promise rejection: ' + (e.reason && e.reason.message ? e.reason.message : String(e.reason)));
+    });
+  })();
+</script>
+<script>
+  // Resilient Leaflet loader: tries multiple CDNs so a single blocked host doesn't break the app.
+  window.__leafletReady = new Promise((resolve)=>{
+    const cdns = [
+      'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+      'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js'
+    ];
+    let i = 0;
+    function tryNext(){
+      if(typeof L !== 'undefined'){ resolve(true); return; }
+      if(i >= cdns.length){ resolve(false); return; }
+      const s = document.createElement('script');
+      s.src = cdns[i++];
+      s.onload = ()=> resolve(typeof L !== 'undefined');
+      s.onerror = tryNext;
+      document.head.appendChild(s);
+    }
+    tryNext();
+  });
+</script>
+<script>
+  (function(){
+    const cssCdns = [
+      'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+      'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'
+    ];
+    let i = 0;
+    function tryNext(){
+      if(i >= cssCdns.length) return;
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = cssCdns[i++];
+      link.onerror = tryNext;
+      document.head.appendChild(link);
+    }
+    tryNext();
+  })();
+</script>
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- PWA manifest (inline, best-effort installability) ---------------- */
+  try{
+    const manifest = {
+      name:"Botgod Nav", short_name:"Botgod Nav", start_url:".", display:"standalone",
+      background_color:"#0A0C0F", theme_color:"#0A0C0F",
+      icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='white' stroke='%23D0021B' stroke-width='10'/%3E%3Ctext x='50' y='68' font-size='48' font-family='Arial' font-weight='800' text-anchor='middle' fill='black'%3E30%3C/text%3E%3C/svg%3E", sizes:"100x100", type:"image/svg+xml"}]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/json"});
+    document.getElementById('manifest-link').href = URL.createObjectURL(blob);
+  }catch(e){}
+
+  /* ---------------- state ---------------- */
+  let unit = 'kmh'; // or 'mph'
+  let muted = false;
+  let lastPos = null; // {lat,lon,t}
+  let currentSpeed = 0; // in m/s
+  let currentLimit = null; // {value, unit}
+  let maxspeedLookupState = 'pending'; // 'pending' | 'checking' | 'found' | 'not-found' | 'error'
+  let isSpeeding = false;
+  let audioCtx = null;
+  let beepTimer = null;
+  let lastOverpassPos = null;
+  let overpassBusy = false;
+
+  let routeCoords = null; // array of [lat,lon]
+  let routeSteps = [];
+  let currentStepIdx = 0;
+  let navActive = false;
+  let followMode = true;
+  let destMarker = null;
+  let userMarker = null;
+  let routeLine = null;
+
+  /* ---------------- helpers ---------------- */
+  function haversine(lat1,lon1,lat2,lon2){
+    const R=6371000, toRad=d=>d*Math.PI/180;
+    const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
+    const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+    return 2*R*Math.asin(Math.sqrt(a));
+  }
+  function mpsToDisplay(mps){
+    return unit==='mph' ? mps*2.23694 : mps*3.6;
+  }
+  function fmtDist(m){
+    if(m==null || isNaN(m)) return '—';
+    if(unit==='mph'){
+      const ft = m*3.28084;
+      if(ft<800) return Math.round(ft)+' ft';
+      return (m/1609.34).toFixed(1)+' mi';
+    }
+    if(m<800) return Math.round(m)+' m';
+    return (m/1000).toFixed(1)+' km';
+  }
+
+  /* ---------------- UI: units / mute ---------------- */
+  const unitBtn = document.getElementById('unitBtn');
+  const muteBtn = document.getElementById('muteBtn');
+  unitBtn.addEventListener('click', ()=>{
+    unit = unit==='kmh' ? 'mph' : 'kmh';
+    unitBtn.textContent = unit==='kmh' ? 'km/h' : 'mph';
+    document.getElementById('speedUnit').textContent = unit==='kmh' ? 'km/h' : 'mph';
+    renderLimit();
+    renderSpeed();
+  });
+  muteBtn.addEventListener('click', ()=>{
+    muted = !muted;
+    muteBtn.textContent = muted ? '🔇' : '🔊';
+    muteBtn.classList.toggle('muted-on', muted);
+    if(muted) stopBeep();
+  });
+
+  /* ---------------- audio alert ---------------- */
+  function ensureAudio(){
+    if(!audioCtx){
+      try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+    }
+  }
+  function beepOnce(){
+    if(!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type='square'; osc.frequency.value=880;
+    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+0.28);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime+0.3);
+  }
+  function startBeep(){
+    if(beepTimer || muted) return;
+    ensureAudio();
+    beepOnce();
+    beepTimer = setInterval(beepOnce, 1400);
+  }
+  function stopBeep(){
+    if(beepTimer){ clearInterval(beepTimer); beepTimer=null; }
+  }
+  // unlock audio context on first user tap (mobile requirement)
+  document.body.addEventListener('touchstart', ensureAudio, {once:true});
+  document.body.addEventListener('click', ensureAudio, {once:true});
+
+  /* ---------------- rendering ---------------- */
+  const signEl = document.getElementById('sign');
+  const limitValEl = document.getElementById('limitVal');
+  const limitUnitEl = document.getElementById('limitUnit');
+  const speedoEl = document.getElementById('speedo');
+  const speedValEl = document.getElementById('speedVal');
+  const overText = document.getElementById('overText');
+  const screenAlert = document.getElementById('screenAlert');
+  const gpsDot = document.getElementById('gpsDot');
+
+  function renderLimit(){
+    if(!currentLimit){
+      limitValEl.textContent = '---';
+      limitValEl.classList.add('placeholder');
+      limitUnitEl.textContent = maxspeedLookupState === 'checking' ? 'checking…'
+        : maxspeedLookupState === 'error' ? 'lookup failed'
+        : 'no data';
+      return;
+    }
+    limitValEl.classList.remove('placeholder');
+    // display limit converted to the app's chosen unit
+    let displayVal;
+    if(currentLimit.unit === 'mph'){
+      displayVal = unit==='mph' ? currentLimit.value : Math.round(currentLimit.value*1.60934);
+    } else {
+      displayVal = unit==='mph' ? Math.round(currentLimit.value/1.60934) : currentLimit.value;
+    }
+    limitValEl.textContent = displayVal;
+    limitUnitEl.textContent = unit==='mph' ? 'mph limit' : 'km/h limit';
+  }
+
+  function renderSpeed(){
+    const disp = mpsToDisplay(currentSpeed);
+    speedValEl.textContent = Math.round(disp);
+    evaluateSpeeding();
+  }
+
+  function evaluateSpeeding(){
+    if(!currentLimit){
+      setSpeedingUI(false);
+      if(maxspeedLookupState === 'not-found'){
+        overText.textContent = 'No speed limit data for this road (OpenStreetMap coverage gap)';
+      } else if(maxspeedLookupState === 'error'){
+        overText.textContent = 'Speed limit lookup failed — retrying…';
+      } else {
+        overText.textContent = 'Checking speed limit for this road…';
+      }
+      overText.classList.remove('speeding');
+      return;
+    }
+    const limitMps = currentLimit.unit==='mph' ? currentLimit.value/2.23694 : currentLimit.value/3.6;
+    const tolerance = 1.4; // ~5km/h buffer in m/s (~3mph)
+    const over = currentSpeed > limitMps + tolerance;
+    setSpeedingUI(over);
+    if(over){
+      const overBy = Math.round(mpsToDisplay(currentSpeed) - mpsToDisplay(limitMps));
+      overText.textContent = `⚠ ${overBy} ${unit==='mph'?'mph':'km/h'} over the limit`;
+      overText.classList.add('speeding');
+    } else {
+      overText.textContent = 'Within speed limit';
+      overText.classList.remove('speeding');
+    }
+  }
+
+  function setSpeedingUI(on){
+    if(on===isSpeeding) return;
+    isSpeeding = on;
+    signEl.classList.toggle('speeding', on);
+    speedoEl.classList.toggle('speeding', on);
+    screenAlert.classList.toggle('on', on);
+    if(on) startBeep(); else stopBeep();
+  }
+
+  /* ---------------- geolocation ---------------- */
+  const gpsPanel = document.getElementById('gpsPanel');
+  const gpsStatusMain = document.getElementById('gpsStatusMain');
+  const gpsStatusSub = document.getElementById('gpsStatusSub');
+  const getLocationBtn = document.getElementById('getLocationBtn');
+
+  let watchId = null;
+  let noFixTimer = null;
+  let retryTimer = null;
+  let retryCount = 0;
+  let hasEverFixed = false;
+
+  function setGpsState(state, main, sub){
+    gpsPanel.classList.remove('searching','weak','locked','error');
+    gpsPanel.classList.add(state);
+    if(main !== undefined) gpsStatusMain.textContent = main;
+    if(sub !== undefined) gpsStatusSub.textContent = sub;
+  }
+
+  function clearNoFixTimer(){ if(noFixTimer){ clearTimeout(noFixTimer); noFixTimer=null; } }
+  function clearRetryTimer(){ if(retryTimer){ clearTimeout(retryTimer); retryTimer=null; } }
+
+  function scheduleRetry(delayMs){
+    clearRetryTimer();
+    retryTimer = setTimeout(()=>{
+      retryCount++;
+      startWatch();
+    }, delayMs);
+  }
+
+  function onPosition(pos){
+    clearNoFixTimer();
+    clearRetryTimer();
+    retryCount = 0;
+    hasEverFixed = true;
+
+    const {latitude, longitude, speed, heading, accuracy} = pos.coords;
+    const now = pos.timestamp || Date.now();
+    gpsDot.classList.add('live');
+
+    if(accuracy != null && accuracy > 30){
+      setGpsState('weak', 'Weak signal', `Accuracy: ±${Math.round(accuracy)}m — move to open sky for a better fix`);
+    } else {
+      setGpsState('locked', 'GPS locked', accuracy!=null ? `Accuracy: ±${Math.round(accuracy)}m` : 'Live tracking');
+    }
+
+    let mps = 0;
+    if(typeof speed === 'number' && speed >= 0){
+      mps = speed;
+    } else if(lastPos){
+      const dt = (now - lastPos.t)/1000;
+      if(dt > 0.3){
+        const d = haversine(lastPos.lat, lastPos.lon, latitude, longitude);
+        mps = d/dt;
+      }
+    }
+    // light smoothing
+    currentSpeed = currentSpeed*0.35 + mps*0.65;
+    if(currentSpeed < 0.4) currentSpeed = 0;
+
+    // ---- heading / course-up map rotation ----
+    // Only trust a heading once actually moving — GPS course and derived bearing are noisy at low speed.
+    let newHeading = null;
+    if(typeof heading === 'number' && !isNaN(heading) && heading >= 0 && currentSpeed > 0.8){
+      newHeading = heading;
+    } else if(lastPos && currentSpeed > 0.8){
+      const moved = haversine(lastPos.lat, lastPos.lon, latitude, longitude);
+      if(moved > 3){ newHeading = bearingBetween(lastPos.lat, lastPos.lon, latitude, longitude); }
+    }
+    if(newHeading != null){
+      if(!haveHeading){ displayHeading = newHeading; haveHeading = true; }
+      else{ displayHeading = (displayHeading + shortestAngle(displayHeading, newHeading) * 0.35 + 360) % 360; }
+      applyMapRotation(displayHeading);
+    }
+
+    lastPos = {lat:latitude, lon:longitude, t:now};
+    renderSpeed();
+    updateMapPosition(latitude, longitude, heading);
+    maybeQueryMaxspeed(latitude, longitude);
+    if(navActive) advanceRoute(latitude, longitude);
+  }
+
+  function onPosError(err){
+    clearNoFixTimer();
+    gpsDot.classList.remove('live');
+    let main = 'GPS error', sub = `Code ${err.code}: ${err.message || 'unknown error'}`;
+    if(err.code === err.PERMISSION_DENIED){
+      main = 'Location permission denied';
+      sub = 'Check your browser site settings → Location → Allow, then tap Get location.' + contextWarningSuffix();
+    } else if(err.code === err.POSITION_UNAVAILABLE){
+      main = 'Position unavailable';
+      sub = 'Device could not determine location. Retrying in 3s…';
+    } else if(err.code === err.TIMEOUT){
+      main = 'GPS timed out';
+      sub = 'No fix yet — retrying in 3s… (' + (retryCount) + ' attempts)';
+    }
+    setGpsState('error', main, sub);
+    overText.textContent = main;
+    // Auto-retry every 3s unless it's an outright permission denial repeated many times
+    scheduleRetry(3000);
+  }
+
+  let embeddedContext = false;
+  try{ embeddedContext = (window.self !== window.top); }catch(e){ embeddedContext = true; }
+  const insecureContext = (typeof window.isSecureContext === 'boolean') && !window.isSecureContext;
+
+  function contextWarningSuffix(){
+    if(insecureContext) return ' — this page isn\'t served over HTTPS, so browsers block GPS entirely.';
+    if(embeddedContext) return ' — running inside an embedded preview; open this file in its own browser tab to allow GPS.';
+    return '';
+  }
+
+  function checkPermissionStatus(){
+    if(!('permissions' in navigator) || !navigator.permissions.query){
+      return;
+    }
+    navigator.permissions.query({name:'geolocation'}).then(status=>{
+      updatePermissionSub(status.state);
+      status.onchange = () => {
+        updatePermissionSub(status.state);
+        if(status.state === 'granted') startWatch();
+      };
+    }).catch(()=>{});
+  }
+  function updatePermissionSub(state){
+    if(!hasEverFixed && gpsPanel.classList.contains('searching')){
+      gpsStatusSub.textContent = 'Permission: ' + state + ' — waiting for first fix…';
+    }
+  }
+
+  function startWatch(){
+    clearRetryTimer();
+    if(!('geolocation' in navigator)){
+      setGpsState('error', 'Geolocation not supported', 'This browser does not support the Geolocation API.');
+      return;
+    }
+    if(watchId !== null){
+      try{ navigator.geolocation.clearWatch(watchId); }catch(e){}
+      watchId = null;
+    }
+    setGpsState('searching', 'Searching for GPS…', 'Permission: requesting / waiting for signal…' + contextWarningSuffix());
+
+    try{
+      // Kick a one-shot getCurrentPosition first — often resolves faster than watchPosition's first fix
+      navigator.geolocation.getCurrentPosition(onPosition, ()=>{ /* let watchPosition handle errors */ }, {
+        enableHighAccuracy:true, maximumAge:2000, timeout:8000
+      });
+
+      watchId = navigator.geolocation.watchPosition(onPosition, onPosError, {
+        enableHighAccuracy:true, maximumAge:1000, timeout:10000
+      });
+    }catch(err){
+      // Some embedded/iframe contexts throw synchronously instead of calling the error callback
+      setGpsState('error', 'Location blocked by this environment',
+        'The browser refused to even ask for permission' + contextWarningSuffix() +
+        ' (' + (err && err.message ? err.message : 'unknown error') + ')');
+      scheduleRetry(4000);
+      return;
+    }
+
+    // Fallback: if nothing at all comes back within 12s, surface a clear message and retry
+    clearNoFixTimer();
+    noFixTimer = setTimeout(()=>{
+      if(!hasEverFixed){
+        setGpsState('error', 'No GPS fix yet', 'Still searching — retrying in 3s. Make sure location is on and you have sky visibility.' + contextWarningSuffix());
+        scheduleRetry(3000);
+      }
+    }, 12000);
+  }
+
+  getLocationBtn.addEventListener('click', ()=>{
+    setGpsState('searching', 'Requesting location…', 'Button pressed — asking the browser now…');
+    getLocationBtn.textContent = 'Requesting…';
+    try{ ensureAudio(); }catch(e){}
+    retryCount = 0;
+    setTimeout(()=>{
+      startWatch();
+      getLocationBtn.textContent = 'Get location';
+    }, 50);
+  });
+
+  checkPermissionStatus();
+  startWatch();
+
+  /* ---------------- Overpass maxspeed lookup ---------------- */
+  function parseMaxspeed(raw){
+    if(!raw) return null;
+    const m = String(raw).match(/(\d+)\s*(mph)?/i);
+    if(!m) return null;
+    return { value: parseInt(m[1],10), unit: m[2] ? 'mph' : 'kmh' };
+  }
+
+  async function maybeQueryMaxspeed(lat, lon){
+    if(overpassBusy) return;
+    if(lastOverpassPos){
+      const moved = haversine(lastOverpassPos.lat, lastOverpassPos.lon, lat, lon);
+      const elapsed = Date.now() - lastOverpassPos.t;
+      if(moved < 25 && elapsed < 8000) return;
+    }
+    lastOverpassPos = {lat, lon, t:Date.now()};
+    overpassBusy = true;
+    maxspeedLookupState = 'checking';
+    try{
+      const query = `[out:json][timeout:5];way(around:35,${lat},${lon})[highway][maxspeed];out tags 5;`;
+      const url = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query);
+      const res = await fetch(url);
+      if(res.ok){
+        const data = await res.json();
+        if(data.elements && data.elements.length){
+          const parsed = parseMaxspeed(data.elements[0].tags.maxspeed);
+          if(parsed){
+            currentLimit = parsed; maxspeedLookupState = 'found';
+          } else {
+            currentLimit = null; maxspeedLookupState = 'not-found';
+          }
+        } else {
+          currentLimit = null; maxspeedLookupState = 'not-found';
+        }
+      } else {
+        maxspeedLookupState = 'error';
+      }
+      renderLimit(); evaluateSpeeding();
+    }catch(e){
+      maxspeedLookupState = 'error';
+      renderLimit(); evaluateSpeeding();
+    }finally{
+      overpassBusy = false;
+    }
+  }
+
+  /* ---------------- map ---------------- */
+  let map = null;
+  let userIcon = null;
+  let mapReady = false;
+  let pendingUserPos = null; // queue a position if it arrives before the map is ready
+  let courseUpMode = true;
+  let displayHeading = 0; // smoothed heading currently applied to the map, degrees 0-360
+  let haveHeading = false;
+  const mapRotatorEl = document.getElementById('mapRotator');
+  const compassBtn = document.getElementById('compassBtn');
+
+  function showMapUnavailable(){
+    const mapEl = document.getElementById('map');
+    mapEl.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;color:#8A93A0;font-size:13px;line-height:1.5;">Map couldn\'t load (network/CDN blocked).<br>Speed limit sign, speedometer and overspeed alerts still work fully.</div>';
+    document.getElementById('recenterBtn').style.display = 'none';
+    compassBtn.style.display = 'none';
+  }
+
+  function bearingBetween(lat1, lon1, lat2, lon2){
+    const toRad = d=>d*Math.PI/180, toDeg = r=>r*180/Math.PI;
+    const y = Math.sin(toRad(lon2-lon1)) * Math.cos(toRad(lat2));
+    const x = Math.cos(toRad(lat1))*Math.sin(toRad(lat2)) - Math.sin(toRad(lat1))*Math.cos(toRad(lat2))*Math.cos(toRad(lon2-lon1));
+    return (toDeg(Math.atan2(y, x)) + 360) % 360;
+  }
+  function shortestAngle(from, to){
+    return ((to - from + 540) % 360) - 180;
+  }
+  function applyMapRotation(headingDeg){
+    if(!courseUpMode){
+      mapRotatorEl.style.transform = 'translate(-50%,-50%) rotate(0deg)';
+      return;
+    }
+    mapRotatorEl.style.transform = `translate(-50%,-50%) rotate(${-headingDeg}deg)`;
+  }
+
+  compassBtn.addEventListener('click', ()=>{
+    courseUpMode = !courseUpMode;
+    compassBtn.classList.toggle('active', courseUpMode);
+    applyMapRotation(displayHeading);
+  });
+
+  function initMap(){
+    map = L.map('map', {zoomControl:true, attributionControl:false}).setView([51.5074,-0.1278], 15);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      subdomains:'abcd', maxZoom:19
+    }).addTo(map);
+
+    // Directional arrow marker — since the map itself rotates to course-up,
+    // the icon just needs to always point straight up.
+    userIcon = L.divIcon({
+      className:'', iconSize:[30,30], iconAnchor:[15,15],
+      html: `<div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.55));">
+        <svg width="30" height="30" viewBox="0 0 30 30">
+          <circle cx="15" cy="15" r="13" fill="rgba(63,224,200,0.18)"/>
+          <!-- Mini Cooper body, top-down, nose pointing up -->
+          <path d="M15 3.2
+                   C19.6 3.2 21.6 6.3 21.9 9.6
+                   L22.3 12.5 C23.2 12.7 23.6 13.2 23.6 14 L23.6 17.4 C23.6 18.1 23.2 18.6 22.4 18.8
+                   L22 21.5 C21.7 24.9 19.4 26.8 15 26.8
+                   C10.6 26.8 8.3 24.9 8 21.5
+                   L7.6 18.8 C6.8 18.6 6.4 18.1 6.4 17.4 L6.4 14 C6.4 13.2 6.8 12.7 7.7 12.5
+                   L8.1 9.6 C8.4 6.3 10.4 3.2 15 3.2 Z"
+                fill="#3FE0C8" stroke="#08201C" stroke-width="0.9"/>
+          <!-- windshield -->
+          <path d="M15 6.6 C17.6 6.6 18.7 8.3 18.9 10.6 L19.1 13.4 C19.15 14.9 18 15.6 15 15.6 C12 15.6 10.85 14.9 10.9 13.4 L11.1 10.6 C11.3 8.3 12.4 6.6 15 6.6 Z" fill="#0E2521"/>
+          <!-- rear window -->
+          <rect x="11.3" y="18.6" width="7.4" height="4" rx="1.4" fill="#0E2521"/>
+          <!-- racing stripes -->
+          <rect x="13.9" y="3.4" width="0.9" height="23.2" fill="#F5F5F2" opacity="0.9"/>
+          <rect x="15.2" y="3.4" width="0.9" height="23.2" fill="#F5F5F2" opacity="0.9"/>
+          <!-- headlights -->
+          <circle cx="11.6" cy="5.6" r="1" fill="#FFF6D8"/>
+          <circle cx="18.4" cy="5.6" r="1" fill="#FFF6D8"/>
+          <!-- side mirrors -->
+          <rect x="5.6" y="11.6" width="1.3" height="1.8" rx="0.5" fill="#0E2521"/>
+          <rect x="23.1" y="11.6" width="1.3" height="1.8" rx="0.5" fill="#0E2521"/>
+        </svg>
+      </div>`
+    });
+
+    map.on('dragstart', ()=>{ followMode = false; });
+    document.getElementById('recenterBtn').addEventListener('click', ()=>{
+      followMode = true;
+      if(lastPos) map.setView([lastPos.lat, lastPos.lon], 16);
+    });
+
+    // Re-parent Leaflet's zoom control out of the rotating layer so it always stays upright.
+    const controlContainer = map.getContainer().querySelector('.leaflet-control-container');
+    if(controlContainer){
+      document.querySelector('.mapwrap').appendChild(controlContainer);
+    }
+    setTimeout(()=> map.invalidateSize(), 60);
+
+    compassBtn.classList.toggle('active', courseUpMode);
+
+    mapReady = true;
+    // if a GPS fix already came in before the map finished loading, place it now
+    if(pendingUserPos){
+      updateMapPosition(pendingUserPos.lat, pendingUserPos.lon, pendingUserPos.heading);
+      pendingUserPos = null;
+    }
+  }
+
+  window.__leafletReady.then((ok)=>{
+    if(ok){ initMap(); }
+    else { showMapUnavailable(); }
+  });
+
+  let firstFix = true;
+  function updateMapPosition(lat, lon, heading){
+    if(!mapReady){ pendingUserPos = {lat, lon, heading}; return; }
+    if(!userMarker){
+      userMarker = L.marker([lat,lon], {icon:userIcon}).addTo(map);
+    } else {
+      userMarker.setLatLng([lat,lon]);
+    }
+    if(firstFix){ map.setView([lat,lon], 16); firstFix=false; }
+    else if(followMode){ map.panTo([lat,lon], {animate:true}); }
+  }
+
+  /* ---------------- destination search (Nominatim, with Photon fallback) ---------------- */
+  const destInput = document.getElementById('destInput');
+  const suggestionsEl = document.getElementById('suggestions');
+  const clearBtn = document.getElementById('clearBtn');
+  const searchGoBtn = document.getElementById('searchGoBtn');
+  const searchDebugEl = document.getElementById('searchDebug');
+  let searchTimer = null;
+
+  function dbg(msg){
+    if(searchDebugEl) searchDebugEl.textContent = 'Debug: ' + msg;
+  }
+
+  destInput.addEventListener('input', ()=>{
+    clearBtn.style.display = destInput.value ? 'block' : 'none';
+    clearTimeout(searchTimer);
+    const q = destInput.value.trim();
+    if(q.length < 3){ dbg('Typing… (' + q.length + '/3 chars)'); suggestionsEl.classList.remove('show'); return; }
+    dbg('Typed "' + q + '" — will auto-search in 400ms');
+    searchTimer = setTimeout(()=>doSearch(q), 400);
+  });
+  destInput.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      clearTimeout(searchTimer);
+      const q = destInput.value.trim();
+      if(q.length >= 2) doSearch(q);
+    }
+  });
+  destInput.addEventListener('search', ()=>{ // fires on mobile keyboard "search"/"go" key for type=search inputs
+    clearTimeout(searchTimer);
+    const q = destInput.value.trim();
+    if(q.length >= 2) doSearch(q);
+  });
+  searchGoBtn.addEventListener('click', ()=>{
+    dbg('Search button clicked…');
+    clearTimeout(searchTimer);
+    const q = destInput.value.trim();
+    if(q.length < 2){
+      dbg('Query too short (' + q.length + ' chars)');
+      suggestionsEl.innerHTML = '<div class="sug-item">Type at least 2 characters first</div>';
+      suggestionsEl.classList.add('show');
+      return;
+    }
+    doSearch(q);
+  });
+  clearBtn.addEventListener('click', ()=>{
+    destInput.value=''; clearBtn.style.display='none'; suggestionsEl.classList.remove('show');
+  });
+
+  async function geocodeNominatim(q){
+    let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=6`;
+    if(lastPos){
+      const d = 0.4;
+      url += `&viewbox=${lastPos.lon-d},${lastPos.lat+d},${lastPos.lon+d},${lastPos.lat-d}&bounded=0`;
+    }
+    dbg('Fetching Nominatim…');
+    const res = await fetch(url);
+    dbg('Nominatim responded: HTTP ' + res.status);
+    if(!res.ok) throw new Error('Nominatim HTTP ' + res.status);
+    const data = await res.json();
+    dbg('Nominatim returned ' + data.length + ' result(s)');
+    return data.map(item => ({
+      name: item.display_name.split(',')[0],
+      sub: item.display_name.split(',').slice(1,3).join(',').trim(),
+      lat: parseFloat(item.lat), lon: parseFloat(item.lon)
+    }));
+  }
+
+  async function geocodePhoton(q){
+    let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6`;
+    if(lastPos) url += `&lat=${lastPos.lat}&lon=${lastPos.lon}`;
+    dbg('Fetching Photon (fallback)…');
+    const res = await fetch(url);
+    dbg('Photon responded: HTTP ' + res.status);
+    if(!res.ok) throw new Error('Photon HTTP ' + res.status);
+    const data = await res.json();
+    const feats = (data.features || []);
+    dbg('Photon returned ' + feats.length + ' result(s)');
+    return feats.map(f => {
+      const p = f.properties || {};
+      const name = p.name || p.street || p.city || 'Unnamed place';
+      const subParts = [p.street, p.city, p.state, p.country].filter(Boolean);
+      return {
+        name, sub: subParts.join(', '),
+        lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0]
+      };
+    });
+  }
+
+  async function doSearch(q){
+    dbg('doSearch("' + q + '") started');
+    suggestionsEl.innerHTML = '<div class="sug-item">Searching…</div>';
+    suggestionsEl.classList.add('show');
+    let results = null;
+    let lastErr = null;
+    try{
+      results = await geocodeNominatim(q);
+    }catch(e){
+      dbg('Nominatim error: ' + (e && e.message ? e.message : e));
+      lastErr = e;
+    }
+    if(!results || !results.length){
+      try{
+        const alt = await geocodePhoton(q);
+        if(alt.length) results = alt;
+      }catch(e2){
+        dbg('Photon error: ' + (e2 && e2.message ? e2.message : e2));
+        if(!lastErr) lastErr = e2;
+      }
+    }
+    if(results && results.length){
+      dbg('Rendering ' + results.length + ' suggestion(s)');
+      renderSuggestions(results);
+    } else if(lastErr){
+      dbg('Both lookups failed — showing error to user');
+      suggestionsEl.innerHTML = `<div class="sug-item">Search unavailable — ${lastErr.message || 'network error'}. Tap Search to retry.</div>`;
+      suggestionsEl.classList.add('show');
+    } else {
+      dbg('Both lookups returned zero results');
+      suggestionsEl.innerHTML = '<div class="sug-item">No results found — try a different search</div>';
+      suggestionsEl.classList.add('show');
+    }
+  }
+
+  function renderSuggestions(list){
+    suggestionsEl.innerHTML = list.map((item,i)=>
+      `<div class="sug-item" data-i="${i}"><div>${item.name}</div><span class="sub">${item.sub}</span></div>`
+    ).join('');
+    suggestionsEl.classList.add('show');
+    [...suggestionsEl.querySelectorAll('.sug-item')].forEach((el,i)=>{
+      el.addEventListener('click', ()=>{
+        const item = list[i];
+        destInput.value = item.name;
+        suggestionsEl.classList.remove('show');
+        setDestination(item.lat, item.lon);
+      });
+    });
+  }
+
+  let destLatLon = null;
+  function setDestination(lat, lon){
+    destLatLon = {lat, lon};
+    if(mapReady){
+      if(destMarker) map.removeLayer(destMarker);
+      destMarker = L.marker([lat,lon], {icon: L.divIcon({
+        className:'', html:'<div style="font-size:22px;line-height:1;">📍</div>', iconSize:[22,22], iconAnchor:[11,20]
+      })}).addTo(map);
+      map.fitBounds([[lat,lon],[lastPos?lastPos.lat:lat, lastPos?lastPos.lon:lon]], {padding:[40,40]});
+    }
+    document.getElementById('startBtn').style.display='block';
+    document.getElementById('startBtn').textContent = 'Get route';
+  }
+
+  /* ---------------- routing (OSRM) ---------------- */
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const maneuverEl = document.getElementById('maneuver');
+  const stepsEl = document.getElementById('steps');
+  const stepsTitleEl = document.getElementById('stepsTitle');
+
+  startBtn.addEventListener('click', async ()=>{
+    if(!lastPos){ alert('Waiting for your GPS location first.'); return; }
+    if(!destLatLon){ alert('Search for a destination first.'); return; }
+    startBtn.textContent = 'Routing…';
+    try{
+      const url = `https://router.project-osrm.org/route/v1/driving/${lastPos.lon},${lastPos.lat};${destLatLon.lon},${destLatLon.lat}?overview=full&geometries=geojson&steps=true`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if(!data.routes || !data.routes.length){ alert('No route found.'); startBtn.textContent='Get route'; return; }
+      const route = data.routes[0];
+      routeCoords = route.geometry.coordinates.map(c=>[c[1],c[0]]);
+      routeSteps = route.legs[0].steps;
+      currentStepIdx = 0;
+      drawRoute();
+      renderSteps();
+      navActive = true;
+      followMode = true;
+      startBtn.style.display='none';
+      stopBtn.style.display='block';
+      maneuverEl.classList.add('show');
+      updateManeuverBanner();
+    }catch(e){
+      alert('Routing failed — check your connection.');
+      startBtn.textContent = 'Get route';
+    }
+  });
+
+  stopBtn.addEventListener('click', ()=>{
+    navActive = false;
+    if(mapReady){
+      if(routeLine){ map.removeLayer(routeLine); routeLine=null; }
+      if(destMarker){ map.removeLayer(destMarker); destMarker=null; }
+    }
+    routeCoords=null; routeSteps=[]; destLatLon=null;
+    maneuverEl.classList.remove('show');
+    stepsEl.classList.remove('show'); stepsTitleEl.classList.remove('show');
+    stopBtn.style.display='none';
+    startBtn.style.display='block';
+    startBtn.textContent='Start navigation';
+    destInput.value='';
+  });
+
+  function drawRoute(){
+    if(!mapReady) return;
+    if(routeLine) map.removeLayer(routeLine);
+    routeLine = L.polyline(routeCoords, {color:'#3FE0C8', weight:5, opacity:0.9}).addTo(map);
+    map.fitBounds(routeLine.getBounds(), {padding:[40,60]});
+  }
+
+  const arrowMap = {
+    'turn-left':'↰','turn-right':'↱','turn-straight':'↑','turn-slight left':'↖','turn-slight right':'↗',
+    'turn-sharp left':'↙','turn-sharp right':'↘','depart':'↑','arrive':'🏁','roundabout':'↻',
+    'merge':'↑','fork':'⑂','continue':'↑','new name':'↑'
+  };
+  function stepText(step){
+    const type = step.maneuver.type;
+    const mod = step.maneuver.modifier;
+    const name = step.name || '';
+    if(type==='depart') return 'Start driving' + (name?` on ${name}`:'');
+    if(type==='arrive') return 'Arrive at destination';
+    if(type==='roundabout' || type==='rotary') return `Enter roundabout${name?`, exit onto ${name}`:''}`;
+    let verb = 'Continue';
+    if(type==='turn') verb = 'Turn';
+    else if(type==='merge') verb = 'Merge';
+    else if(type==='fork') verb = 'Keep';
+    else if(type==='new name' || type==='continue') verb = 'Continue';
+    const modTxt = mod ? mod.replace('slight ','slight ') : '';
+    return `${verb}${modTxt?' '+modTxt:''}${name?` onto ${name}`:''}`.trim();
+  }
+  function stepArrow(step){
+    const key = step.maneuver.type==='turn' ? `turn-${step.maneuver.modifier}` : step.maneuver.type;
+    return arrowMap[key] || '↑';
+  }
+
+  function renderSteps(){
+    stepsTitleEl.classList.add('show');
+    stepsEl.classList.add('show');
+    stepsEl.innerHTML = routeSteps.map((s,i)=>`
+      <div class="step ${i===currentStepIdx?'current':''}" data-i="${i}">
+        <div class="n">${i+1}</div>
+        <div class="txt">${stepText(s)}</div>
+        <div class="d">${fmtDist(s.distance)}</div>
+      </div>`).join('');
+  }
+
+  function updateManeuverBanner(){
+    if(!routeSteps.length || currentStepIdx>=routeSteps.length) return;
+    const step = routeSteps[currentStepIdx];
+    document.getElementById('maneuverArrow').textContent = stepArrow(step);
+    document.getElementById('maneuverInstr').textContent = stepText(step);
+    let dist = step.distance;
+    if(lastPos){
+      const loc = step.maneuver.location; // [lon,lat]
+      dist = haversine(lastPos.lat, lastPos.lon, loc[1], loc[0]);
+    }
+    document.getElementById('maneuverDist').textContent = 'in ' + fmtDist(dist);
+    [...stepsEl.children].forEach((el,i)=> el.classList.toggle('current', i===currentStepIdx));
+  }
+
+  function advanceRoute(lat, lon){
+    if(!routeSteps.length) return;
+    updateManeuverBanner();
+    const step = routeSteps[currentStepIdx];
+    const loc = step.maneuver.location;
+    const d = haversine(lat, lon, loc[1], loc[0]);
+    const threshold = step.maneuver.type==='arrive' ? 25 : 35;
+    if(d < threshold && currentStepIdx < routeSteps.length-1){
+      currentStepIdx++;
+      updateManeuverBanner();
+      renderSteps();
+    } else if(d < 25 && currentStepIdx === routeSteps.length-1){
+      maneuverEl.classList.remove('show');
+      overText.textContent = 'You have arrived';
+    }
+  }
+
+  /* ---------------- init ---------------- */
+  renderLimit();
+  renderSpeed();
+})();
+</script>
+</body>
+</html>
